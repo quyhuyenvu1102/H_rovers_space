@@ -63,7 +63,8 @@ geometry_msgs::Pose2D centerLocationOdom;
 
 int rover_number;
 double thetas[2];
-
+int stepMove;
+int *step;
  //*********************************
 
 int currentMode = 0;
@@ -283,26 +284,8 @@ void mobilityStateMachine(const ros::TimerEvent&) {
         if (!init) {
             if (timerTimeElapsed > startDelayInSeconds) {
 
-                centerLocation.x = 0;
-                centerLocation.y = 0;
-                centerLocationOdom.x = 0;
-                centerLocationOdom.y = 0;
 
-                for (int i = 0; i < 100; i++) {
-                    mapLocation[i].x = 0;
-                    mapLocation[i].y = 0;
-                    mapLocation[i].theta = 0;
-                }
-
-                // Set the location of the center circle location in the map
-                // frame based upon our current average location on the map.
-                centerLocationMap.x = currentLocationAverage.x;
-                centerLocationMap.y = currentLocationAverage.y;
-                centerLocationMap.theta = currentLocationAverage.theta;
-
-                // initialization has run
-                init = true;
-
+                stepMove = 0;
                 currentLocation.x = iniLocation.x;
                 currentLocation.y = iniLocation.y;
 
@@ -321,7 +304,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
                 else if (currentLocation.x>1){
                     rover_number=2;
                     thetas[0]= -M_PI/3;
-                    thetas[1]= 0;
+                    thetas[1]= M_PI/2;
                    /* thetas[2] = 7*M_PI/12;
                     thetas[3] = -7*M_PI/12;
                     distances[0]=0.5;
@@ -367,7 +350,25 @@ void mobilityStateMachine(const ros::TimerEvent&) {
                 goalLocation.x = dis * cos(goalLocation.theta+M_PI);
                 goalLocation.y = dis * sin(goalLocation.theta+M_PI);
 
+                centerLocation.x = 0;
+                centerLocation.y = 0;
+                centerLocationOdom.x = 0;
+                centerLocationOdom.y = 0;
 
+                for (int i = 0; i < 100; i++) {
+                    mapLocation[i].x = 0;
+                    mapLocation[i].y = 0;
+                    mapLocation[i].theta = 0;
+                }
+
+                // Set the location of the center circle location in the map
+                // frame based upon our current average location on the map.
+                centerLocationMap.x = currentLocationAverage.x;
+                centerLocationMap.y = currentLocationAverage.y;
+                centerLocationMap.theta = currentLocationAverage.theta;
+
+                // initialization has run
+                init = true;
             } else {
                 return;
             }
@@ -462,7 +463,8 @@ void mobilityStateMachine(const ros::TimerEvent&) {
             //Otherwise, drop off target and select new random uniform heading
             //If no targets have been detected, assign a new goal
             else if (!targetDetected && timerTimeElapsed > returnToSearchDelay) {
-                goalLocation = searchController.search(currentLocation, thetas, rover_number);
+                step = &stepMove;
+                goalLocation = searchController.search(currentLocation, thetas, rover_number,step);
             }
 
             //Purposefully fall through to next case without breaking

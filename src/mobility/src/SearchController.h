@@ -15,7 +15,7 @@ class SearchController {
     SearchController();
 
     // performs search pattern
-    geometry_msgs::Pose2D search(geometry_msgs::Pose2D currentLocation,double thetas[], int roverNumb);
+    geometry_msgs::Pose2D search(geometry_msgs::Pose2D currentLocation,double thetas[], int roverNumb,int *init);
 
     // continues search pattern after interruption
     geometry_msgs::Pose2D continueInterruptedSearch(geometry_msgs::Pose2D currentLocation, geometry_msgs::Pose2D oldGoalLocation);
