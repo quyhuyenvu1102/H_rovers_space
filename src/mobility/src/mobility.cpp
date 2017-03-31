@@ -62,8 +62,7 @@ geometry_msgs::Pose2D centerLocationOdom;
 //**************************
 
 int rover_number;
-double thetas[4];
-double distances[4];
+double thetas[2];
 
  //*********************************
 
@@ -283,104 +282,6 @@ void mobilityStateMachine(const ros::TimerEvent&) {
         // auto mode but wont work in main goes here)
         if (!init) {
             if (timerTimeElapsed > startDelayInSeconds) {
-                currentLocation.x = iniLocation.x;
-                currentLocation.y = iniLocation.y;
-
-                if (currentLocation.y<-1){
-                    rover_number=1;
-                    thetas[0]= -2*M_PI/3;
-                    thetas[1]= -M_PI/3;
-                    thetas[2] = 0;
-                    thetas[3] = M_PI;
-                    distances[0]=0.5;
-                    distances[1]=1;
-                    distances[2]=0.5;
-                    distances[3]=1;
-                }
-
-                else if (currentLocation.x>1){
-                    rover_number=2;
-                    thetas[0]= -M_PI/3;
-                    thetas[1]= M_PI/2;
-                    thetas[2] = 7*M_PI/12;
-                    thetas[3] = -7*M_PI/12;
-                    distances[0]=0.5;
-                    distances[1]=1;
-                    distances[2]=0.5;
-                    distances[3]=1;
-                }
-
-                else if (currentLocation.x<-1){
-
-                    thetas[0]= -2*M_PI/3;
-                    thetas[1]= 0;
-                    thetas[2] = 5*M_PI/2;
-                    thetas[3] = -5*M_PI/2;
-                    distances[0]=0.5;
-                    distances[1]=1;
-                    distances[2]=0.5;
-                    distances[3]=1;
-                }
-
-                else{
-                    thetas[0]= -2*M_PI/3;
-                    thetas[1]= 0;
-                    thetas[2] = 5*M_PI/2;
-                    thetas[3] = -5*M_PI/2;
-                    distances[0]=0.5;
-                    distances[1]=1;
-                    distances[2]=0.5;
-                    distances[3]=1;
-                }
-
-
-
-                goalLocation.theta = thetas[0];
-
-
-                //goalLocation.theta = thetas[0];
-                //select initial search position 50 cm from center (0,0)
-                goalLocation.x = 0.5 * cos(goalLocation.theta+M_PI);
-                goalLocation.y = 0.5 * sin(goalLocation.theta+M_PI);
-
-                centerLocation.x = 0;
-                centerLocation.y = 0;
-                centerLocationOdom.x = 0;
-                centerLocationOdom.y = 0;
-
-                for (int i = 0; i < 100; i++) {
-                    mapLocation[i].x = 0;
-                    mapLocation[i].y = 0;
-                    mapLocation[i].theta = 0;
-                }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                //select initial search position 50 cm from center (0,0)
-                goalLocation.x = 0.5 * cos(goalLocation.theta+M_PI);
-                goalLocation.y = 0.5 * sin(goalLocation.theta+M_PI);
 
                 centerLocation.x = 0;
                 centerLocation.y = 0;
@@ -401,6 +302,72 @@ void mobilityStateMachine(const ros::TimerEvent&) {
 
                 // initialization has run
                 init = true;
+
+                currentLocation.x = iniLocation.x;
+                currentLocation.y = iniLocation.y;
+
+                if (currentLocation.y<-1){
+                    rover_number=1;
+                    thetas[0]= -2*M_PI/3;
+                    thetas[1]= -M_PI/3;
+                   /* thetas[2] = 0;
+                    thetas[3] = M_PI;
+                    distances[0]=0.5;
+                    distances[1]=1;
+                    distances[2]=0.5;
+                    distances[3]=1;*/
+                }
+
+                else if (currentLocation.x>1){
+                    rover_number=2;
+                    thetas[0]= -M_PI/3;
+                    thetas[1]= 0;
+                   /* thetas[2] = 7*M_PI/12;
+                    thetas[3] = -7*M_PI/12;
+                    distances[0]=0.5;
+                    distances[1]=1;
+                    distances[2]=0.5;
+                    distances[3]=1;*/
+                }
+
+                else if (currentLocation.x<-1){
+                    rover_number=3;
+                    thetas[0]= M_PI/2;
+                    thetas[1]= -2*M_PI/3;
+                    /*thetas[2] = 5*M_PI/2;
+                    thetas[3] = -5*M_PI/2;
+                    distances[0]=0.5;
+                    distances[1]=1;
+                    distances[2]=0.5;
+                    distances[3]=1;*/
+                }
+
+                else{
+                    rover_number  = 0 ;
+                    thetas[0]= -2*M_PI/3;
+                    thetas[1]= 0;
+                   /* thetas[2] = 5*M_PI/2;
+                    thetas[3] = -5*M_PI/2;
+                    distances[0]=0.5;
+                    distances[1]=1;
+                    distances[2]=0.5;
+                    distances[3]=1;*/
+                }
+
+
+                float dis;
+
+
+                goalLocation.theta = thetas[0];
+                dis = 0.5;
+
+
+                //goalLocation.theta = thetas[0];
+                //select initial search position 50 cm from center (0,0)
+                goalLocation.x = dis * cos(goalLocation.theta+M_PI);
+                goalLocation.y = dis * sin(goalLocation.theta+M_PI);
+
+
             } else {
                 return;
             }
@@ -495,7 +462,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
             //Otherwise, drop off target and select new random uniform heading
             //If no targets have been detected, assign a new goal
             else if (!targetDetected && timerTimeElapsed > returnToSearchDelay) {
-                goalLocation = searchController.search(currentLocation);
+                goalLocation = searchController.search(currentLocation, thetas, rover_number);
             }
 
             //Purposefully fall through to next case without breaking

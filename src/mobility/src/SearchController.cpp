@@ -7,7 +7,7 @@ SearchController::SearchController() {
 /**
  * This code implements a basic random walk search.
  */
-geometry_msgs::Pose2D SearchController::search(geometry_msgs::Pose2D currentLocation) {
+geometry_msgs::Pose2D SearchController::search(geometry_msgs::Pose2D currentLocation,double thetas[], int roverNumb) {
   geometry_msgs::Pose2D goalLocation;
 
   //select new heading from Gaussian distribution around current heading
