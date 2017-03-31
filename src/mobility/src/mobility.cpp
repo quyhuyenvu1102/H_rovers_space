@@ -59,6 +59,14 @@ geometry_msgs::Pose2D centerLocation;
 geometry_msgs::Pose2D centerLocationMap;
 geometry_msgs::Pose2D centerLocationOdom;
 
+//**************************
+
+int rover_number;
+double thetas[4];
+double distances[4];
+
+ //*********************************
+
 int currentMode = 0;
 float mobilityLoopTimeStep = 0.1; // time between the mobility loop calls
 float status_publish_interval = 1;
@@ -144,7 +152,7 @@ ros::Timer targetDetectedTimer;
 // records time for delays in sequanced actions, 1 second resolution.
 time_t timerStartTime;
 
-// An initial delay to allow the rover to gather enough position data to 
+// An initial delay to allow the rover to gather enough position data to
 // average its location.
 unsigned int startDelayInSeconds = 1;
 float timerTimeElapsed = 0;
@@ -278,14 +286,97 @@ void mobilityStateMachine(const ros::TimerEvent&) {
                 currentLocation.x = iniLocation.x;
                 currentLocation.y = iniLocation.y;
 
-                if (currentLocation.y<-1)
-                    goalLocation.theta = -M_PI/2;
-                else if (currentLocation.x>1)
-                    goalLocation.theta = 0;
-                else if (currentLocation.x<-1)
-                    goalLocation.theta = M_PI;
-                else
-                    goalLocation.theta = M_PI/2;
+                if (currentLocation.y<-1){
+                    rover_number=1;
+                    thetas[0]= -2*M_PI/3;
+                    thetas[1]= -M_PI/3;
+                    thetas[2] = 0;
+                    thetas[3] = M_PI;
+                    distances[0]=0.5;
+                    distances[1]=1;
+                    distances[2]=0.5;
+                    distances[3]=1;
+                }
+
+                else if (currentLocation.x>1){
+                    rover_number=2;
+                    thetas[0]= -M_PI/3;
+                    thetas[1]= M_PI/2;
+                    thetas[2] = 7*M_PI/12;
+                    thetas[3] = -7*M_PI/12;
+                    distances[0]=0.5;
+                    distances[1]=1;
+                    distances[2]=0.5;
+                    distances[3]=1;
+                }
+
+                else if (currentLocation.x<-1){
+
+                    thetas[0]= -2*M_PI/3;
+                    thetas[1]= 0;
+                    thetas[2] = 5*M_PI/2;
+                    thetas[3] = -5*M_PI/2;
+                    distances[0]=0.5;
+                    distances[1]=1;
+                    distances[2]=0.5;
+                    distances[3]=1;
+                }
+
+                else{
+                    thetas[0]= -2*M_PI/3;
+                    thetas[1]= 0;
+                    thetas[2] = 5*M_PI/2;
+                    thetas[3] = -5*M_PI/2;
+                    distances[0]=0.5;
+                    distances[1]=1;
+                    distances[2]=0.5;
+                    distances[3]=1;
+                }
+
+
+
+                goalLocation.theta = thetas[0];
+
+
+                //goalLocation.theta = thetas[0];
+                //select initial search position 50 cm from center (0,0)
+                goalLocation.x = 0.5 * cos(goalLocation.theta+M_PI);
+                goalLocation.y = 0.5 * sin(goalLocation.theta+M_PI);
+
+                centerLocation.x = 0;
+                centerLocation.y = 0;
+                centerLocationOdom.x = 0;
+                centerLocationOdom.y = 0;
+
+                for (int i = 0; i < 100; i++) {
+                    mapLocation[i].x = 0;
+                    mapLocation[i].y = 0;
+                    mapLocation[i].theta = 0;
+                }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                 //select initial search position 50 cm from center (0,0)
                 goalLocation.x = 0.5 * cos(goalLocation.theta+M_PI);
